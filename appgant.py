@@ -1,46 +1,53 @@
+# appgant.py
 import streamlit as st
 import pandas as pd
 import streamlit.components.v1 as components
 
-st.set_page_config(page_title="Gantt Chart Collapsible", layout="wide")
-
+# Load data from published Google Sheets (CSV format)
 sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQP_ACzeqBAEhJXAaO3j3nndMKVJ3QTKEFqWKt1cc2bQggHySKcoOqvZGmwMu8IamCmk6CjsHTHsv8t/pub?gid=498246392&single=true&output=csv"
 df = pd.read_csv(sheet_url)
 
-# Konversi tanggal
-df['Start Date'] = pd.to_datetime(df['Start Date'], dayfirst=True, errors='coerce')
-df['End Date'] = pd.to_datetime(df['End Date'], dayfirst=True, errors='coerce')
-df['Percent Complete'] = df['Percent Complete'].str.replace('%', '', regex=False).astype(float).fillna(0)
+# Fill NA to empty string to avoid errors
+df = df.fillna("")
 
-# Buat list rows untuk Google Chart
+# Convert date
+df['Start Date'] = pd.to_datetime(df['Start Date'], dayfirst=True)
+df['End Date'] = pd.to_datetime(df['End Date'], dayfirst=True)
+
+# Generate hierarchical task structure
 rows = []
-for _, row in df.iterrows():
-    if pd.isna(row['Start Date']) or pd.isna(row['End Date']):
-        continue
 
-    start = f"new Date({row['Start Date'].year}, {row['Start Date'].month - 1}, {row['Start Date'].day})"
-    end = f"new Date({row['End Date'].year}, {row['End Date'].month - 1}, {row['End Date'].day})"
-    percent = int(row['Percent Complete'])
-
+for idx, row in df.iterrows():
+    client_id = f"client_{row['Task ID'].split('/')[0]}"
+    app_id = f"{client_id}_app_{row['layanan aplikasi']}"
+    feat_id = f"{app_id}_feat_{row['Fitur Aplikasi']}"
     task_id = row['Task ID']
-    task_name = f"{row['Nama klient']} / {row['layanan aplikasi']} / {row['Fitur Aplikasi']} / {row['Topik']}"
-    resource = str(row['Topik Detail']).replace("'", "").replace("\n", " ") if pd.notna(row['Topik Detail']) else ""
 
-    rows.append(f"['{task_id}', '{task_name}', '{resource}', {start}, {end}, null, {percent}, null]")
+    # Level 1 - Client
+    if not any(r['id'] == client_id for r in rows):
+        rows.append({"id": client_id, "name": row['Nama Klient'], "parent": None, "start": None, "end": None, "complete": 0})
 
-if not rows:
-    st.error("Tidak ada data valid untuk ditampilkan di Gantt chart.")
-else:
-    row_data = ",\n".join(rows)
+    # Level 2 - Layanan Aplikasi
+    if not any(r['id'] == app_id for r in rows):
+        rows.append({"id": app_id, "name": row['layanan aplikasi'], "parent": client_id, "start": None, "end": None, "complete": 0})
 
-    # Optional untuk debug
-    st.code(row_data, language='javascript')
+    # Level 3 - Fitur Aplikasi
+    if not any(r['id'] == feat_id for r in rows):
+        rows.append({"id": feat_id, "name": row['Fitur Aplikasi'], "parent": app_id, "start": None, "end": None, "complete": 0})
 
-    # Load HTML dan ganti placeholder
-    with open("gantt.html", "r") as f:
-        html_template = f.read()
+    # Level 4 - Task Detail
+    rows.append({
+        "id": task_id,
+        "name": f"{row['Topik']} - {row['Topik Detail']}",
+        "parent": feat_id,
+        "start": row['Start Date'].strftime('%Y-%m-%d'),
+        "end": row['End Date'].strftime('%Y-%m-%d'),
+        "complete": int(str(row['Percent Complete']).replace('%', '').strip())
+    })
 
-    html_output = html_template.replace("JSONDATA", row_data)
-
-    st.title("📊 Gantt Chart Proyek (Multi-Level Hirarki)")
-    components.html(html_output, height=800, scrolling=True)
+# Pass data into HTML via JavaScript
+components.html(
+    open("gantt.html").read().replace("__DATA__", str(rows)),
+    height=600,
+    scrolling=True
+)
