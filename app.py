@@ -13,8 +13,8 @@ df.columns = df.columns.str.strip()
 st.write("Kolom yang tersedia:", df.columns.tolist())
 
 # Ubah tanggal ke datetime
-df['Mulai'] = pd.to_datetime(df['Mulai'])
-df['Selesai'] = pd.to_datetime(df['Selesai'])
+df['Dibuka pada'] = pd.to_datetime(df['Dibuka pada'])
+df['Tenggat Waktu'] = pd.to_datetime(df['Tenggat Waktu'])
 
 # Buat kolom hierarki
 df['Task'] = df['Client'] + ' / ' + df['Topik'] + ' / ' + df['Tahapan']
