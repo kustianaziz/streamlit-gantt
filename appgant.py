@@ -25,7 +25,7 @@ for idx, row in df.iterrows():
 
     # Level 1 - Client
     if not any(r['id'] == client_id for r in rows):
-        rows.append({"id": client_id, "name": row['Nama Klient'], "parent": None, "start": None, "end": None, "complete": 0})
+        rows.append({"id": client_id, "name": row['Task Name'], "parent": None, "start": None, "end": None, "complete": 0})
 
     # Level 2 - Layanan Aplikasi
     if not any(r['id'] == app_id for r in rows):
