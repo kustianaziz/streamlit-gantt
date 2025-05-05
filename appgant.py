@@ -8,8 +8,8 @@ sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQP_ACzeqBAEhJXAaO3
 df = pd.read_csv(sheet_url)
 
 # Transformasi data menjadi format yang dibutuhkan
-df['Start Date'] = pd.to_datetime(df['Dibuka Pada'])
-df['End Date'] = pd.to_datetime(df['Tenggat Waktu'])
+df['Start Date'] = pd.to_datetime(df['Start Date'])
+df['End Date'] = pd.to_datetime(df['End Date'])
 
 # Kolom task dengan penggabungan nama hierarki
 df['Task Name'] = df['Nama klient'] + ' / ' + df['layanan aplikasi'] + ' / ' + df['Fitur Aplikasi'] + ' / ' + df['Topik'] + ' / ' + df['Topik Detail']
