@@ -23,7 +23,7 @@ for _, row in df.iterrows():
     percent = int(row['Percent Complete'])
 
     task_id = row['Task ID']
-    task_name = f"{row['Task Name']} / {row['layanan aplikasi']} / {row['Fitur Aplikasi']} / {row['Topik']}"
+    task_name = f"{row['Nama klient']} / {row['layanan aplikasi']} / {row['Fitur Aplikasi']} / {row['Topik']}"
     resource = str(row['Topik Detail']).replace("'", "").replace("\n", " ") if pd.notna(row['Topik Detail']) else ""
 
     rows.append(f"['{task_id}', '{task_name}', '{resource}', {start}, {end}, null, {percent}, null]")
@@ -34,7 +34,7 @@ else:
     row_data = ",\n".join(rows)
 
     # Optional untuk debug
-    # st.code(row_data, language='javascript')
+    st.code(row_data, language='javascript')
 
     # Load HTML dan ganti placeholder
     with open("gantt.html", "r") as f:
