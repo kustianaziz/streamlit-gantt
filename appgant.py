@@ -10,23 +10,33 @@ df = pd.read_csv(sheet_url)
 df['Start Date'] = pd.to_datetime(df['Start Date'], dayfirst=True, errors='coerce')
 df['End Date'] = pd.to_datetime(df['End Date'], dayfirst=True, errors='coerce')
 df['Percent Complete'] = df['Percent Complete'].str.replace('%', '').astype(float)
+df = df.dropna(subset=['Start Date', 'End Date'])
+
 
 # Format data ke JavaScript Gantt
 rows = []
+rows = []
 for i, row in df.iterrows():
     try:
+        start = row['Start Date']
+        end = row['End Date']
+        if pd.isna(start) or pd.isna(end):
+            continue  # Lewati baris yang kosong
+
         rows.append([
             row['Task ID'],
             f"{row['Topik']} - {row['Topik Detail']}",
             row['Task Name'],
-            f"new Date({row['Start Date'].year}, {row['Start Date'].month - 1}, {row['Start Date'].day})",
-            f"new Date({row['End Date'].year}, {row['End Date'].month - 1}, {row['End Date'].day})",
+            f"new Date({start.year}, {start.month - 1}, {start.day})",
+            f"new Date({end.year}, {end.month - 1}, {end.day})",
             'null',
             row['Percent Complete'],
             None
         ])
-    except:
-        pass  # Lewati baris error
+    except Exception as e:
+        print(f"Error on row {i}: {e}")
+        continue
+
 
 # Ubah ke string JS
 row_strings = [f"['{r[0]}', '{r[1]}', '{r[2]}', {r[3]}, {r[4]}, {r[5]}, {r[6]}, {r[7]}]" for r in rows]
