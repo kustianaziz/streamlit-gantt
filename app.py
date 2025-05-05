@@ -21,20 +21,20 @@ df['Task'] = df['Nama Klien'] + ' / ' + df['Layanan Aplikasi'] + ' / ' + df['Fit
 
 # Filter Sidebar
 client_filter = st.sidebar.multiselect("Filter Client", df['Nama Klien'].unique(), default=df['Nama Klien'].unique())
-date_range = st.sidebar.date_input("Pilih Rentang Tanggal", [df['Dibuka pada'].min(), df['Tenggat Waktu'].max()])
+date_range = st.sidebar.date_input("Pilih Rentang Tanggal", [df['Mulai'].min(), df['Selesai'].max()])
 
 # Filter data
 filtered_df = df[
     (df['Nama Klien'].isin(client_filter)) &
-    (df['Dibuka pada'] >= pd.to_datetime(date_range[0])) &
-    (df['Tenggat Waktu'] <= pd.to_datetime(date_range[1]))
+    (df['Mulai'] >= pd.to_datetime(date_range[0])) &
+    (df['Selesai'] <= pd.to_datetime(date_range[1]))
 ]
 
 # Gantt Chart
 fig = px.timeline(
     filtered_df,
-    x_start="Dibuka pada",
-    x_end="Tenggat Waktu",
+    x_start="Mulai",
+    x_end="Selesai",
     y="Task",
     color="Client",
     title="Gantt Chart Bertingkat dari Google Sheets",
