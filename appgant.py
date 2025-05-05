@@ -1,4 +1,3 @@
-# appgant.py
 import streamlit as st
 import pandas as pd
 import streamlit.components.v1 as components
@@ -7,12 +6,18 @@ import streamlit.components.v1 as components
 sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQP_ACzeqBAEhJXAaO3j3nndMKVJ3QTKEFqWKt1cc2bQggHySKcoOqvZGmwMu8IamCmk6CjsHTHsv8t/pub?gid=498246392&single=true&output=csv"
 df = pd.read_csv(sheet_url)
 
+# Verify columns exist before accessing
+print("Columns in the dataset:", df.columns)
+
 # Fill NA to empty string to avoid errors
 df = df.fillna("")
 
-# Convert date
-df['Start Date'] = pd.to_datetime(df['Start Date'], dayfirst=True)
-df['End Date'] = pd.to_datetime(df['End Date'], dayfirst=True)
+# Convert dates safely, handling any errors
+df['Start Date'] = pd.to_datetime(df['Start Date'], errors='coerce', dayfirst=True)
+df['End Date'] = pd.to_datetime(df['End Date'], errors='coerce', dayfirst=True)
+
+# Handle Percent Complete to ensure it's numeric
+df['Percent Complete'] = df['Percent Complete'].apply(lambda x: int(str(x).replace('%', '').strip()) if isinstance(x, str) else x)
 
 # Generate hierarchical task structure
 rows = []
