@@ -2,21 +2,19 @@ import streamlit as st
 import pandas as pd
 import streamlit.components.v1 as components
 
-# --- Konfigurasi halaman ---
 st.set_page_config(page_title="Gantt Chart Collapsible", layout="wide")
 
-# --- Ambil data dari Google Sheets (link publish ke web, format CSV lebih stabil) ---
 sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQP_ACzeqBAEhJXAaO3j3nndMKVJ3QTKEFqWKt1cc2bQggHySKcoOqvZGmwMu8IamCmk6CjsHTHsv8t/pub?gid=498246392&single=true&output=csv"
 df = pd.read_csv(sheet_url)
 
-# --- Konversi tanggal ---
+# Konversi tanggal
 df['Start Date'] = pd.to_datetime(df['Start Date'], dayfirst=True, errors='coerce')
 df['End Date'] = pd.to_datetime(df['End Date'], dayfirst=True, errors='coerce')
 df['Percent Complete'] = df['Percent Complete'].str.replace('%', '', regex=False).astype(float).fillna(0)
 
-# --- Buat data untuk Google Charts Gantt ---
+# Buat list rows untuk Google Chart
 rows = []
-for i, row in df.iterrows():
+for _, row in df.iterrows():
     if pd.isna(row['Start Date']) or pd.isna(row['End Date']):
         continue
 
@@ -26,18 +24,23 @@ for i, row in df.iterrows():
 
     task_id = row['Task ID']
     task_name = f"{row['Task Name']} / {row['layanan aplikasi']} / {row['Fitur Aplikasi']} / {row['Topik']}"
-    resource = row['Topik Detail'].replace("'", "").replace("\n", " ") if pd.notna(row['Topik Detail']) else ""
+    resource = str(row['Topik Detail']).replace("'", "").replace("\n", " ") if pd.notna(row['Topik Detail']) else ""
 
     rows.append(f"['{task_id}', '{task_name}', '{resource}', {start}, {end}, null, {percent}, null]")
 
-row_data = ",\n".join(rows)
+if not rows:
+    st.error("Tidak ada data valid untuk ditampilkan di Gantt chart.")
+else:
+    row_data = ",\n".join(rows)
 
-# --- Baca template HTML dan ganti placeholder ---
-with open("gantt.html", "r") as f:
-    html_template = f.read()
+    # Optional untuk debug
+    # st.code(row_data, language='javascript')
 
-html_output = html_template.replace("JSONDATA", row_data)
+    # Load HTML dan ganti placeholder
+    with open("gantt.html", "r") as f:
+        html_template = f.read()
 
-# --- Tampilkan di Streamlit ---
-st.title("📊 Gantt Chart Proyek (Multi-Level Hirarki)")
-components.html(html_output, height=800, scrolling=True)
+    html_output = html_template.replace("JSONDATA", row_data)
+
+    st.title("📊 Gantt Chart Proyek (Multi-Level Hirarki)")
+    components.html(html_output, height=800, scrolling=True)
