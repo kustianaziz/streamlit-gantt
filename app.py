@@ -33,10 +33,10 @@ filtered_df = df[
 # Gantt Chart
 fig = px.timeline(
     filtered_df,
-    x_start="Mulai",
-    x_end="Selesai",
+    x_start="Dibuka pada",
+    x_end="Tenggat Waktu",
     y="Task",
-    color="Client",
+    color="Nama Klien",
     title="Gantt Chart Bertingkat dari Google Sheets",
 )
 fig.update_yaxes(autorange="reversed")
