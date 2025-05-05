@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8">
+    <title>Gantt Chart</title>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script>
-      google.charts.load('current', {'packages':['gantt']});
+      google.charts.load("current", {packages:["gantt"]});
       google.charts.setOnLoadCallback(drawChart);
-
-      function daysToMilliseconds(days) {
-        return days * 24 * 60 * 60 * 1000;
-      }
 
       function drawChart() {
         var data = new google.visualization.DataTable();
@@ -21,16 +19,23 @@
         data.addColumn('number', 'Percent Complete');
         data.addColumn('string', 'Dependencies');
 
-        // Tempat data dari Python akan dimasukkan di sini
-        data.addRows(JSONDATA);
+        data.addRows([
+          JSONDATA
+        ]);
 
         var options = {
-          height: 600,
+          height: data.getNumberOfRows() * 42,
           gantt: {
-            trackHeight: 30,
-            criticalPathEnabled: false,
-            innerGridHorizLine: { stroke: '#ffe0b2', strokeWidth: 1 },
-            innerGridTrack: { fill: '#fff3e0' }
+            trackHeight: 38,
+            labelStyle: {
+              fontSize: 14,
+              color: '#333'
+            },
+            criticalPathEnabled: true,
+            innerGridHorizLine: {
+              stroke: '#e0e0e0',
+              strokeWidth: 1
+            }
           }
         };
 
